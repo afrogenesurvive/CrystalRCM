@@ -31,7 +31,7 @@ Please note - the app may not work unless you move it outside of the distributio
 
 ## Building
 
-Currently, it will be a bit annoying to build as there are some hardcoded paths in the Xcode project. However, other than that, it should be as simple as opening the project in Xcode and building for yourself.
+The Xcode project references the [USBDeviceSwift](https://github.com/Arti3DPlayer/USBDeviceSwift) library as a local Swift package — clone it into the folder next to this repository (so that `../USBDeviceSwift` resolves) before opening the project. Other than that, it should be as simple as opening the project in Xcode and building for yourself.
 
 ## How to create (old)
 

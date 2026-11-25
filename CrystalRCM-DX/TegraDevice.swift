@@ -2,6 +2,13 @@ import Cocoa
 import USBDeviceSwift
 import IOKit
 
+// kIOUSBInterfaceUserClientTypeID and kIOUSBInterfaceInterfaceID were removed
+// from recent macOS SDKs as importable globals (they are now #define macros that
+// Clang does not import into Swift), so recreate them from the byte values in
+// <IOKit/usb/IOUSBLib.h>.
+let kIOUSBInterfaceUserClientTypeID: CFUUID = CFUUIDCreateWithBytes(nil, 0x2d, 0x97, 0x86, 0xc6, 0x9e, 0xf3, 0x11, 0xd4, 0xad, 0x51, 0x00, 0x0a, 0x27, 0x05, 0x28, 0x61)
+let kIOUSBInterfaceInterfaceID: CFUUID = CFUUIDCreateWithBytes(nil, 0x73, 0xc9, 0x7a, 0xe8, 0x9e, 0xf3, 0x11, 0xd4, 0xb1, 0xd0, 0x00, 0x0a, 0x27, 0x05, 0x28, 0x61)
+
 // rewritten from fusee_gelee.py !!
 let RCM_PAYLOAD_ADDR: UInt32 = 0x40010000
 let PAYLOAD_START_ADDR: UInt32 = 0x40010E40
@@ -346,7 +353,7 @@ class TegraDevice {
         payload += [UInt8](repeating: 0, count: 680 - payload.count)
         payload += [UInt8](intermezzoData)
         
-        let currentOffset = RCM_PAYLOAD_ADDR + UInt32(intermezzoSize)
+        let currentOffset = RCM_PAYLOAD_ADDR + UInt32(intermezzoData.count)
         let paddingToPayloadStart = Int(PAYLOAD_START_ADDR - currentOffset)
         payload += [UInt8](repeating: 0, count: paddingToPayloadStart)
         
@@ -359,12 +366,12 @@ class TegraDevice {
             payload += sprayValue
         }
         
-        payload += payloadBytes.dropFirst(payloadBytes.count - firstChunkSize)
+        payload += payloadBytes.dropFirst(firstChunkSize)
         payload += [UInt8](repeating: 0, count: 0x1000 - (payload.count % 0x1000))
         
         setProgressTo(progress: 40.0)
-        if payload.count > length {
-            let sizeOver = payload.count - length
+        if payload.count > MAX_PAYLOAD_LENGTH {
+            let sizeOver = payload.count - MAX_PAYLOAD_LENGTH
             print("[error] Payload is too large to be submitted via RCM. (\(sizeOver) bytes larger than max).")
             throw TegraDeviceError.OversizedPayload(bytesOver: sizeOver)
         }

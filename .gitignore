@@ -1,0 +1,5 @@
+# macOS
+.DS_Store
+
+# devsec_cogdebt derived artifacts
+.devsec_cogdebt/
